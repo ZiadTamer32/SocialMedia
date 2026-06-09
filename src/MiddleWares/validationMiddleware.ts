@@ -68,3 +68,20 @@ export const commonValidation = {
     .length(6, "OTP must be 6 digits")
     .regex(/^[0-9]{6}$/, "Invalid OTP"),
 };
+
+export const RealTimeValidation = <T>(
+  ValidationSchema: ZodType,
+  value: T,
+) => {
+  const validationResult = ValidationSchema.safeParse(value);
+
+  if (!validationResult.success) {
+    throw new BadRequestException("Validation Failed", {
+      validationErrors: validationResult.error.issues.map((err) => ({
+        path: err.path,
+        message: err.message,
+      })),
+    });
+  }
+  return validationResult.data;
+}

@@ -12,6 +12,7 @@ import { pipeline } from "node:stream";
 import { successResponse } from "./Common/response/response.js";
 import postController from "./Modules/Post/post.controller.js";
 import commentController from "./Modules/Comment/comment.controller.js";
+import realtimeGateway from "./Modules/RealTime/realtime.gateway.js";
 
 async function bootstrap() {
   const app: express.Express = express();
@@ -59,9 +60,11 @@ async function bootstrap() {
 
   app.use(globalErrorHandling);
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`App Running on port ${PORT}`);
   });
+
+  realtimeGateway.initializeIo(server);
 }
 
 export default bootstrap;

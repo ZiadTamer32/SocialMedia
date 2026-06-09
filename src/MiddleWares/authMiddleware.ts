@@ -10,19 +10,8 @@ import { ROLE_SECRETS } from "../Common/constants.js";
 import userRepo from "../DB/repositories/user.repo.js";
 import redisMethods from "../DB/repositories/redis.repo.js";
 
-export const authentication = async (
-  req: IRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new UnauthorizedException("Unauthorized");
-  }
-
-  const token = authHeader.split(" ")[1];
-
+export const checkToken = async (token: string, path: string) => {
   const unverified = jwt.decode(token);
 
   if (!unverified || typeof unverified === "string" || !unverified.aud) {
@@ -31,7 +20,7 @@ export const authentication = async (
 
   const [role, tokenType] = unverified.aud as [RoleEnum, string];
 
-  const isRefreshUrl = req.path === "/renew-token";
+  const isRefreshUrl = path === "/renew-token";
 
   if (!isRefreshUrl && tokenType !== TokenEnum.Access) {
     throw new UnauthorizedException("Invalid token structure");
@@ -83,6 +72,24 @@ export const authentication = async (
       "Token expired due to logout from all devices",
     );
   }
+  return { verified, isUserExist }
+}
+
+export const authentication = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new UnauthorizedException("Unauthorized");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  const { verified, isUserExist } = await checkToken(token, req.path);
+
 
   req.tokenData = verified;
   req.user = isUserExist;
