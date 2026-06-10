@@ -7,18 +7,22 @@ import {
 import { decryption } from "../../Common/security/crypto.js";
 import { HUser } from "../../DB/Models/user.model.js";
 import UserRepo from "../../DB/repositories/user.repo.js";
+import chatRepo from "../../DB/repositories/chat.repo.js";
 import RedisRepo from "../../DB/repositories/redis.repo.js";
 import S3BucketSerivce from "../../Common/S3Bucket/s3bucket.service.js";
 import { compareOperation, hashOperation } from "../../Common/security/hash.js";
 import { IProfilePicDto } from "./user.dto.js";
 import { Types } from "mongoose";
+import { ChatTypeEnum } from "../../Common/enums/index.js";
 
 class UserService {
   private userRepo: typeof UserRepo;
+  private _chatRepo: typeof chatRepo;
   private redisMethods: typeof RedisRepo;
   private _s3BucketSerivce: typeof S3BucketSerivce;
   constructor() {
     this.userRepo = UserRepo;
+    this._chatRepo = chatRepo;
     this.redisMethods = RedisRepo;
     this._s3BucketSerivce = S3BucketSerivce;
   }
@@ -38,6 +42,11 @@ class UserService {
         createdAt: 0,
         updatedAt: 0,
       },
+      options: {
+        populate: {
+          path: "friends",
+        },
+      },
     });
 
     if (!user) {
@@ -48,7 +57,17 @@ class UserService {
       user.phone = decryption(user.phone);
     }
 
-    return user;
+    const groups = await this._chatRepo.find({
+      filter: {
+        participants: { $in: [user._id] },
+        chatType: ChatTypeEnum.OVM,
+      },
+      options: {
+        populate: "participants",
+      },
+    });
+
+    return { user, groups };
   };
 
   enableTwoStepVerification = async (user: HUser) => {

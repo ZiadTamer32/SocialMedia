@@ -69,10 +69,7 @@ export const commonValidation = {
     .regex(/^[0-9]{6}$/, "Invalid OTP"),
 };
 
-export const RealTimeValidation = <T>(
-  ValidationSchema: ZodType,
-  value: T,
-) => {
+export const RealTimeValidation = <T>(ValidationSchema: ZodType, value: T) => {
   const validationResult = ValidationSchema.safeParse(value);
 
   if (!validationResult.success) {
@@ -84,4 +81,4 @@ export const RealTimeValidation = <T>(
     });
   }
   return validationResult.data;
-}
+};

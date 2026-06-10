@@ -3,21 +3,23 @@ import type { NextFunction, Response } from "express";
 import { authentication } from "../../MiddleWares/authMiddleware.js";
 import userService from "./user.service.js";
 import { successResponse } from "../../Common/response/response.js";
-import { IRequest, IUser } from "../../Common/interface/index.js";
+import { IRequest } from "../../Common/interface/index.js";
 import { validation } from "../../MiddleWares/validationMiddleware.js";
 import { logoutSchema, updatePasswordSchema } from "./user.validation.js";
 import multerStorage from "../../MiddleWares/multerMiddleware.js";
-import { MulterStorageEnum } from "../../Common/enums/index.js";
+import chatController from "../chat/chat.controller.js";
 
 const userController = Router();
 const UserService = new userService();
+
+userController.use("/:userId/chat", chatController);
 
 userController.get(
   "/",
   authentication,
   async (req: IRequest, res: Response, next: NextFunction) => {
     const result = await UserService.getUser(req.user!._id);
-    return successResponse<IUser>({ res, data: result });
+    return successResponse({ res, data: result });
   },
 );
 
@@ -74,9 +76,7 @@ userController.patch(
 userController.post(
   "/uploadCoverPics",
   authentication,
-  multerStorage({
-    storageType: MulterStorageEnum.Memory,
-  }).array("coverPics", 3),
+  multerStorage({}).array("coverPics", 3),
   async (req: IRequest, res: Response, next: NextFunction) => {
     const coverPics = await UserService.uploadCoverPics(
       req.user!.id,
@@ -93,9 +93,7 @@ userController.post(
 userController.post(
   "/uploadProfilePic",
   authentication,
-  multerStorage({
-    storageType: MulterStorageEnum.Memory,
-  }).single("profilePic"),
+  multerStorage({}).single("profilePic"),
   async (req: IRequest, res: Response, next: NextFunction) => {
     const profilePic = await UserService.uploadProfilePic(
       req.user!.id,

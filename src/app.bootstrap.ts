@@ -2,16 +2,17 @@ import express from "express";
 import cors from "cors";
 import s3bucketService from "./Common/S3Bucket/s3bucket.service.js";
 import authController from "./Modules/Auth/auth.controller.js";
-import testDbConnection from "./DB/connection.js";
 import userController from "./Modules/User/user.controller.js";
+import postController from "./Modules/Post/post.controller.js";
+import commentController from "./Modules/Comment/comment.controller.js";
+import chatController from "./Modules/chat/chat.controller.js";
+import testDbConnection from "./DB/connection.js";
 import { globalErrorHandling } from "./MiddleWares/errorMiddleware.js";
 import { PORT } from "./config/app.config.js";
 import { testRedisConnection } from "./DB/redis.connection.js";
 import { promisify } from "node:util";
 import { pipeline } from "node:stream";
 import { successResponse } from "./Common/response/response.js";
-import postController from "./Modules/Post/post.controller.js";
-import commentController from "./Modules/Comment/comment.controller.js";
 import realtimeGateway from "./Modules/RealTime/realtime.gateway.js";
 
 async function bootstrap() {
@@ -46,6 +47,7 @@ async function bootstrap() {
   app.use("/user", userController);
   app.use("/post", postController);
   app.use("/comment", commentController);
+  app.use("/chat", chatController);
 
   app.use(
     "/*d",

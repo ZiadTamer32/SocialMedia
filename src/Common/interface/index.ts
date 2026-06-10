@@ -1,5 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import {
+  ChatTypeEnum,
   GenderEnum,
   PostPrivacyEnum,
   ProviderEnum,
@@ -9,6 +10,7 @@ import {
 import { Request } from "express";
 import { Types } from "mongoose";
 import { HUser } from "../../DB/Models/user.model.js";
+import type { Socket } from "socket.io";
 
 export interface IUser {
   userName: string;
@@ -31,6 +33,26 @@ export interface IUser {
   isSoftDeleted?: boolean;
 }
 
+export interface IMessage {
+  author: Types.ObjectId;
+  content?: string;
+  attachments?: string[];
+  deletedAt?: Date;
+  isSoftDeleted?: boolean;
+}
+
+export interface IChat {
+  author: Types.ObjectId;
+  participants: Types.ObjectId[];
+  messages: IMessage[];
+  chatType: ChatTypeEnum;
+  group_name?: string;
+  group_image?: string;
+  roomId?: string;
+  deletedAt?: Date;
+  isSoftDeleted?: boolean;
+}
+
 export interface IPost {
   author: Types.ObjectId;
   privacy: PostPrivacyEnum;
@@ -44,6 +66,7 @@ export interface IPost {
   deletedAt?: Date;
   isSoftDeleted?: boolean;
 }
+
 export interface IComment {
   postId: Types.ObjectId;
   commentId: Types.ObjectId;
@@ -62,6 +85,12 @@ export interface IComment {
 export interface IRequest extends Request {
   user?: HUser;
   tokenData?: JwtPayload;
+}
+export interface SocketAuth extends Socket {
+  data: {
+    user: HUser;
+    tokenData: JwtPayload;
+  };
 }
 
 export interface ILoginResponse {

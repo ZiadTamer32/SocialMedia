@@ -58,11 +58,23 @@ class RedisRepo {
     return 1;
   }
 
+  // Notification-FCM
   async addToSet(userId: Types.ObjectId | string, FCMToken: string) {
     return await client.sAdd(`FCMToken::${userId}`, FCMToken);
   }
   async getSet(userId: Types.ObjectId | string) {
     return await client.sMembers(`FCMToken::${userId}`);
+  }
+
+  // Socket-Io
+  async addToSocketIo(userId: Types.ObjectId | string, socketId: string) {
+    return await client.sAdd(`SocketIo::${userId}`, socketId);
+  }
+  async getSocketIo(userId: Types.ObjectId | string) {
+    return await client.sMembers(`SocketIo::${userId}`);
+  }
+  async removeSocketIo(userId: Types.ObjectId | string, socketId: string) {
+    return await client.sRem(`SocketIo::${userId}`, socketId);
   }
 }
 

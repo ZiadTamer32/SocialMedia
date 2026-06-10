@@ -36,3 +36,8 @@ export enum ReactionEnum {
   Sad,
   Angry,
 }
+
+export enum ChatTypeEnum {
+  OVO = "ovo",
+  OVM = "ovm",
+}
